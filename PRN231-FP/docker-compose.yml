@@ -31,10 +31,10 @@ services:
       - '8080:80'
     environment:
       - CONSUL_CONF_BASE_URL=http://consul:8888
-      - CONSUL_CONF_ID=FP-AUTH
-      - CONSUL_CONF_NAME=FP-AUTH
-      - CONSUL_CONF_ADDRESS=localhost
-      - FP_CONSUL_PORT=8080
+      - CONSUL_CONF_ID=FP-Auth
+      - CONSUL_CONF_NAME=FP-Auth
+      - CONSUL_CONF_ADDRESS=fp-auth
+      - CONSUL_CONF_PORT=80
     restart: always
 
   fp-fap:
@@ -44,12 +44,12 @@ services:
       dockerfile: FP-FAP/Dockerfile
     networks:
       - consul-network
+    ports:
+      - '8081:80'
     environment:
       - CONSUL_CONF_BASE_URL=http://consul:8888
       - CONSUL_CONF_ID=FP-FAP
       - CONSUL_CONF_NAME=FP-FAP
-      - CONSUL_CONF_ADDRESS=localhost
+      - CONSUL_CONF_ADDRESS=fp-fap
       - CONSUL_CONF_PORT=80
-    ports:
-      - '80:80'
     restart: always

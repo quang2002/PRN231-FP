@@ -10,6 +10,8 @@
 
     <ItemGroup>
         <PackageReference Include="Consul" Version="1.6.10.9" />
+        <PackageReference Include="Firebase.Auth" Version="1.0.0" />
+        <PackageReference Include="Google.Cloud.Firestore" Version="3.3.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
     </ItemGroup>
 

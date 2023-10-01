@@ -1,16 +1,55 @@
-﻿services:
+﻿version: '2'
+
+networks:
+  consul-network:
+    driver: bridge
+
+services:
+  consul:
+    image: 'bitnami/consul:latest'
+    networks:
+      - consul-network
+    environment:
+      - CONSUL_HTTP_PORT_NUMBER=8888
+    ports:
+      - '8888:8888'
+      - '8300:8300'
+      - '8301:8301'
+      - '8301:8301/udp'
+      - '8500:8500'
+      - '8600:8600'
+      - '8600:8600/udp'
+  
   fp-auth:
-    image: fp-auth
+    image: 'fp-auth'
     build:
       context: .
       dockerfile: FP-Auth/Dockerfile
+    networks:
+      - consul-network
     ports:
-      - 8080:80
+      - '8080:80'
+    environment:
+      - CONSUL_CONF_BASE_URL=http://consul:8888
+      - CONSUL_CONF_ID=FP-AUTH
+      - CONSUL_CONF_NAME=FP-AUTH
+      - CONSUL_CONF_ADDRESS=localhost
+      - FP_CONSUL_PORT=8080
     restart: always
+
   fp-fap:
-    image: fp-fap
+    image: 'fp-fap'
     build:
       context: .
       dockerfile: FP-FAP/Dockerfile
+    networks:
+      - consul-network
+    environment:
+      - CONSUL_CONF_BASE_URL=http://consul:8888
+      - CONSUL_CONF_ID=FP-FAP
+      - CONSUL_CONF_NAME=FP-FAP
+      - CONSUL_CONF_ADDRESS=localhost
+      - CONSUL_CONF_PORT=80
     ports:
-      - 80:80
+      - '80:80'
+    restart: always

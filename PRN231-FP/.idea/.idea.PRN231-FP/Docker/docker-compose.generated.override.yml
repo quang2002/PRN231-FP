@@ -1,0 +1,23 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  fp-fap:
+    build:
+      context: "/home/yuyu/Projects/PRN231-FP/PRN231-FP"
+      dockerfile: "FP-FAP/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net6.0/FP-FAP.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+      NUGET_PACKAGES: "/home/yuyu/.nuget/packages"
+      NUGET_FALLBACK_PACKAGES: "/home/yuyu/.nuget/packages"
+    image: "fp-fap:dev"
+    ports: []
+    volumes:
+    - "/home/yuyu/.nuget/packages:/root/.nuget/fallbackpackages"
+    - "/home/yuyu/Projects/PRN231-FP/PRN231-FP/FP-FAP:/app:rw"
+    - "/home/yuyu/Projects/PRN231-FP/PRN231-FP:/src:rw"
+    working_dir: "/app"

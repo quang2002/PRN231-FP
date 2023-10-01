@@ -1,0 +1,16 @@
+﻿services:
+  fp-auth:
+    image: fp-auth
+    build:
+      context: .
+      dockerfile: FP-Auth/Dockerfile
+    ports:
+      - 8080:80
+    restart: always
+  fp-fap:
+    image: fp-fap
+    build:
+      context: .
+      dockerfile: FP-FAP/Dockerfile
+    ports:
+      - 80:80

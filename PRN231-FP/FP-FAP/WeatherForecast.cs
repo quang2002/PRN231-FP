@@ -1,4 +1,4 @@
-namespace VapeStore;
+namespace FP_FAP;
 
 public class WeatherForecast
 {

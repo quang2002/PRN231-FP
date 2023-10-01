@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace VapeStore.Controllers;
+namespace FP_FAP.Controllers;
 
 [ApiController]
 [Route("[controller]")]

@@ -4,17 +4,17 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:33425",
-      "sslPort": 44396
+      "applicationUrl": "http://localhost:13449",
+      "sslPort": 44367
     }
   },
   "profiles": {
-    "VapeStore": {
+    "FP_Auth": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "https://localhost:7150;http://localhost:5098",
+      "applicationUrl": "https://localhost:7095;http://localhost:5044",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

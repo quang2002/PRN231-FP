@@ -1,0 +1,53 @@
+@startuml "Use Case Diagram: User"
+left to right direction
+
+actor "General User" <<User>> as User
+actor "Student" <<Operator>> as Student
+actor "Teacher" <<Operator>> as Teacher
+actor "Admin" <<Operator>> as Admin
+
+actor "Authentication" <<Service>> as Authentication
+actor "Authorization" <<Service>> as Authorization
+actor "Chat" <<Service>> as Chat
+
+rectangle "Actions" {
+    usecase "Login" as Login
+    usecase "Register" as Register
+    usecase "Logout" as Logout
+    usecase "Reset Password" as ResetPassword
+    usecase "View Feedbacks" as ViewFeedbacks
+    usecase "Do Feedback" as DoFeedback
+    usecase "Q&A" as QnA
+
+    User -- Login
+    User -- Logout
+    User -- ResetPassword
+    User -- QnA
+
+    Student -- ViewFeedbacks
+    Student -- DoFeedback
+
+    Teacher -- ViewFeedbacks
+
+    Admin -- ViewFeedbacks
+    Admin -- Register
+
+    Login -- Authentication
+    ResetPassword -- Authentication
+
+    ViewFeedbacks -- Authorization
+    Register -- Authorization
+    DoFeedback -- Authorization
+    QnA -- Chat
+}
+
+Authorization ..> Authentication : <<include>>
+Chat ..> Authorization: <<include>>
+
+
+Student --|> User : <<extend>>
+Teacher --|> User : <<extend>>
+Admin --|> User : <<extend>>
+
+
+@enduml

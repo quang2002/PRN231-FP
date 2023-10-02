@@ -1,0 +1,21 @@
+name: FP-Workflow
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+  
+jobs:
+  build_and_run:
+    runs-on: self-hosted
+    defaults:
+      run:
+          working-directory: PRN231-FP  
+    steps:
+    - uses: actions/checkout@v3
+    - name: Compose Down
+      run: docker compose down --rmi local
+    - name: Compose Up
+      run: docker compose up -d --force-recreate

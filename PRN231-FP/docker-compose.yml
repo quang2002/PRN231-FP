@@ -5,16 +5,6 @@ networks:
     driver: bridge
 
 services:
-  nginx:
-    build:
-      context: FP-Nginx
-      dockerfile: Dockerfile
-    ports:
-      - '80:80'
-    networks:
-      - consul-network
-    restart: always
-  
   consul:
     image: 'bitnami/consul:latest'
     networks:
@@ -63,7 +53,7 @@ services:
       - CONSUL_CONF_ADDRESS=fp-fap
       - CONSUL_CONF_PORT=80
     restart: always
-    
+  
   fp-chat:
     image: 'fp-chat'
     build:
@@ -80,3 +70,17 @@ services:
       - CONSUL_CONF_ADDRESS=fp-chat
       - CONSUL_CONF_PORT=80
     restart: always
+  
+  nginx:
+    build:
+      context: FP-Nginx
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+    networks:
+      - consul-network
+    restart: always
+    depends_on:
+      - fp-auth
+      - fp-chat
+      - fp-fap

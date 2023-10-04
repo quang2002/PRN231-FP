@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+﻿namespace FP_FAP.Controllers;
 
-namespace FP_Auth.Controllers;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/hello")]
@@ -9,6 +9,6 @@ public class HelloController : ControllerBase
     [HttpGet]
     public string Index()
     {
-        return "[PRN231-FP] - Auth";
+        return "[PRN231-FP] - FAP";
     }
 }

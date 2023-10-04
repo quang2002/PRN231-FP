@@ -64,7 +64,6 @@ services:
       - CONSUL_CONF_PORT=80
     restart: always
     
-
   fp-chat:
     image: 'fp-chat'
     build:

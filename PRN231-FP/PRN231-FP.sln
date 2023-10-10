@@ -5,6 +5,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Items", "Items", "{1685160F-BE31-4973-A81E-8F84B0786AE5}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
+		SharedVolume\nginx.conf = SharedVolume\nginx.conf
+		SharedVolume\prometheus.yml = SharedVolume\prometheus.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FP-FAP", "FP-FAP\FP-FAP.csproj", "{2625F9EF-A8BD-416B-A558-DE72D5865555}"
@@ -12,12 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedService", "SharedService\SharedService.csproj", "{DA3239F4-4CF3-4DF8-9E17-483CEAD20ABF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FP-Chat", "FP-Chat\FP-Chat.csproj", "{1775E2C7-1708-42D7-B06F-182007C1D9BE}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nginx", "Nginx", "{E17CC32B-FA5E-43A1-B229-1A446145CA5C}"
-	ProjectSection(SolutionItems) = preProject
-		FP-Nginx\nginx.conf = FP-Nginx\nginx.conf
-		FP-Nginx\Dockerfile = FP-Nginx\Dockerfile
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +39,5 @@ Global
 		{1775E2C7-1708-42D7-B06F-182007C1D9BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{E17CC32B-FA5E-43A1-B229-1A446145CA5C} = {1685160F-BE31-4973-A81E-8F84B0786AE5}
 	EndGlobalSection
 EndGlobal

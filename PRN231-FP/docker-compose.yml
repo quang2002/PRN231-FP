@@ -67,28 +67,26 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    networks:
-      - monitoring
+    restart: unless-stopped
+    privileged: true
   
   prometheus:
     image: 'prom/prometheus:latest'
     volumes:
       - ./SharedVolume/prometheus.yml:/etc/prometheus/prometheus.yml
-    networks:
-      - monitoring
     ports:
       - '9090:9090'
     depends_on:
       - node-exporter
+    restart: unless-stopped
   
   grafana:
     image: 'grafana/grafana:latest'
     volumes:
       - grafana:/var/lib/grafana
-    networks:
-      - monitoring
     ports:
       - '3000:3000'
+    restart: unless-stopped
 
   nginx:
     image: 'nginx:latest'
@@ -107,6 +105,3 @@ volumes:
   grafana:
     driver: local
 
-networks:
-  monitoring:
-    driver: bridge

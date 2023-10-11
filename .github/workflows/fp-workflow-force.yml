@@ -1,10 +1,6 @@
-name: FP-Workflow
+name: FP-Workflow-Force
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
   workflow_dispatch:
   
 jobs:
@@ -15,5 +11,7 @@ jobs:
           working-directory: PRN231-FP  
     steps:
     - uses: actions/checkout@v3
+    - name: Compose Down
+      run: docker compose down --rmi local
     - name: Compose Up
-      run: docker compose up -d --build --remove-orphans
+      run: docker compose up -d --force-recreate

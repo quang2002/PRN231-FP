@@ -1,0 +1,8 @@
+.fp-header {
+    height: 80px !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #212121;
+}

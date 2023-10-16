@@ -1,60 +1,17 @@
 ﻿version: '2'
 
 services:
-  consul:
-    image: 'bitnami/consul:latest'
-    environment:
-      - CONSUL_HTTP_PORT_NUMBER=8888
-    ports:
-      - '8888:8888'
-      - '8300:8300'
-      - '8301:8301'
-      - '8301:8301/udp'
-      - '8500:8500'
-      - '8600:8600'
-      - '8600:8600/udp'
-  
-  fp-auth:
-    image: 'fp-auth'
-    build:
-      context: .
-      dockerfile: FP-Auth/Dockerfile
-    environment:
-      - CONSUL_CONF_BASE_URL=http://consul:8888
-      - CONSUL_CONF_ID=FP-Auth
-      - CONSUL_CONF_NAME=FP-Auth
-      - CONSUL_CONF_ADDRESS=fp-auth
-      - CONSUL_CONF_PORT=80
-    depends_on:
-      - consul
-
   fp-fap:
     image: 'fp-fap'
     build:
       context: .
       dockerfile: FP-FAP/Dockerfile
-    environment:
-      - CONSUL_CONF_BASE_URL=http://consul:8888
-      - CONSUL_CONF_ID=FP-FAP
-      - CONSUL_CONF_NAME=FP-FAP
-      - CONSUL_CONF_ADDRESS=fp-fap
-      - CONSUL_CONF_PORT=80
-    depends_on:
-      - consul
 
   fp-chat:
     image: 'fp-chat'
     build:
       context: .
       dockerfile: FP-Chat/Dockerfile
-    environment:
-      - CONSUL_CONF_BASE_URL=http://consul:8888
-      - CONSUL_CONF_ID=FP-Chat
-      - CONSUL_CONF_NAME=FP-Chat
-      - CONSUL_CONF_ADDRESS=fp-chat
-      - CONSUL_CONF_PORT=80
-    depends_on:
-      - consul
   
   node-exporter:
     image: 'prom/node-exporter:latest'
@@ -74,8 +31,6 @@ services:
     image: 'prom/prometheus:latest'
     volumes:
       - ./SharedVolume/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - '9090:9090'
     depends_on:
       - node-exporter
     restart: unless-stopped
@@ -84,18 +39,15 @@ services:
     image: 'grafana/grafana:latest'
     volumes:
       - grafana:/var/lib/grafana
-    ports:
-      - '3000:3000'
     restart: unless-stopped
 
   nginx:
-    image: 'nginx:latest'
+    image: 'nginx:alpine-slim'
     volumes:
       - ./SharedVolume/nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
       - '80:80'
     depends_on:
-      - fp-auth
       - fp-chat
       - fp-fap
       - prometheus

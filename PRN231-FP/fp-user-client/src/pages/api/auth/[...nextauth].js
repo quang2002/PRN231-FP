@@ -13,4 +13,19 @@ export const authOptions = {
     },
 };
 
-export default NextAuth(authOptions);
+export default NextAuth({
+    ...authOptions,
+    callbacks: {
+        jwt: ({ token, account }) => {
+            if (account) {
+                token.accessToken = account["access_token"];
+            }
+            return token;
+        },
+        session: ({ session, token }) => {
+            session.token = token;
+            console.log(session);
+            return session;
+        },
+    }
+});

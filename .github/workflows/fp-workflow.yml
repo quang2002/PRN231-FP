@@ -15,5 +15,7 @@ jobs:
           working-directory: PRN231-FP  
     steps:
     - uses: actions/checkout@v3
+    - name: Prune Unused Resource
+      run: docker system prune -af
     - name: Compose Up
-      run: docker compose up -d --build --remove-orphans
+      run: docker-compose up -d --build --remove-orphans

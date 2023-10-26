@@ -23,8 +23,8 @@ jobs:
       with:
         files: 'PRN231-FP/FP-FAP/appsettings.secret.json'
       env:
-        ConnectionStrings.DB: ${{ secret.CONNECTION_STRING }}
-        Jwt.Key: ${{ secret.JWT_KEY }}
+        ConnectionStrings.DB: ${{ secrets.CONNECTION_STRING }}
+        Jwt.Key: ${{ secrets.JWT_KEY }}
     - name: Prune Unused Resource
       run: docker system prune -af
     - name: Compose Up

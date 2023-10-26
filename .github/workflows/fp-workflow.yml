@@ -19,6 +19,12 @@ jobs:
           working-directory: PRN231-FP  
     steps:
     - uses: actions/checkout@v3
+    - uses: microsoft/variable-substitution@v1
+      with:
+        files: 'PRN231-FP/FP-FAP/appsettings.secret.json'
+      env:
+        ConnectionStrings.DB: ${ secret.CONNECTION_STRING }
+        Jwt.Key: ${ secret.JWT_KEY }
     - name: Prune Unused Resource
       run: docker system prune -af
     - name: Compose Up

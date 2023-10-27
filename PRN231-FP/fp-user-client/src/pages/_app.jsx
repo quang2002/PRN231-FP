@@ -1,5 +1,5 @@
 import './global.css';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProvider, useSession } from 'next-auth/react';
 import HeaderComponent from '../components/Header'
 import { Fragment } from 'react';
 

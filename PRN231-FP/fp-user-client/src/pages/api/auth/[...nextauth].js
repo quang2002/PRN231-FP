@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import { generateToken } from "../../../api/fap-api/generate-token";
 
 export const authOptions = {
     providers: [
@@ -22,10 +23,13 @@ export default NextAuth({
             }
             return token;
         },
-        session: ({ session, token }) => {
-            session.token = token;
-            console.log(session);
+        session: async ({ session, token }) => {
+            const response = await generateToken(token.accessToken);
+
+            session.accessToken = response?.token;
+            session.errorToken = response?.message;
+
             return session;
         },
-    }
+    },
 });

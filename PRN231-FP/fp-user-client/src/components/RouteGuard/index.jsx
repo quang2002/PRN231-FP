@@ -10,7 +10,7 @@ export default function RouteGuard({ children }) {
         return <></>;
     }
 
-    if (status === 'unauthenticated') {
+    if (status === 'unauthenticated' || !data?.accessToken) {
         router.replace('/');
         return <></>;
     }

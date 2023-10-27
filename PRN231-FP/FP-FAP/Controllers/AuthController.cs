@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FP_FAP.DTO;
+using FP_FAP.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -14,22 +15,25 @@ using Microsoft.IdentityModel.Tokens;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private TimeSpan TokenLifetime { get; } = TimeSpan.FromMinutes(30);
+    private TimeSpan TokenLifetime { get; } = TimeSpan.FromDays(1);
 
     #region Inject
 
-    private IConfiguration Configuration { get; }
+    private IConfiguration Configuration  { get; }
+    private UserCollection UserCollection { get; }
 
     public AuthController(
-        IConfiguration configuration
+        IConfiguration configuration,
+        UserCollection userCollection
     )
     {
-        this.Configuration = configuration;
+        this.Configuration  = configuration;
+        this.UserCollection = userCollection;
     }
 
     #endregion
 
-    [HttpGet]
+    [HttpGet("generate-token")]
     [AllowAnonymous]
     public async Task<IActionResult> GenerateToken(
         [FromBody] GenerateTokenRequest request,
@@ -39,7 +43,12 @@ public class AuthController : ControllerBase
         try
         {
             var tokenInfo = await this.InternalGoogleTokenInfoAsync(request.GoogleAccessToken, cancellationToken);
-            var token     = this.InternalGenerateToken(tokenInfo.Email, "Admin", DateTime.Now.Add(this.TokenLifetime));
+
+            this.InternalBusinessCheck(tokenInfo);
+
+            var user = await this.UserCollection.GetOrCreateByEmailAsync(tokenInfo.Email, cancellationToken);
+
+            var token = this.InternalGenerateToken(user, DateTime.Now.Add(this.TokenLifetime));
 
             return this.Ok(new GenerateTokenResponse
             {
@@ -55,6 +64,14 @@ public class AuthController : ControllerBase
                 Success = false,
                 Message = e.Message,
             });
+        }
+    }
+
+    private void InternalBusinessCheck(GoogleTokenInfo tokenInfo)
+    {
+        if (!tokenInfo.Email.EndsWith("@fpt.edu.vn"))
+        {
+            throw new Exception("Only fpt email is allowed");
         }
     }
 
@@ -84,7 +101,7 @@ public class AuthController : ControllerBase
         return tokenInfo;
     }
 
-    private string InternalGenerateToken(string email, string role, DateTime expires)
+    private string InternalGenerateToken(User user, DateTime expires)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key          = Encoding.UTF8.GetBytes(this.Configuration["Jwt:Key"]);
@@ -93,9 +110,9 @@ public class AuthController : ControllerBase
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, email),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Email, user.Email),
             }),
             Expires = expires,
             SigningCredentials = new SigningCredentials(

@@ -1,10 +1,22 @@
 using System.Text;
+using FP_FAP.Middlewares;
+using FP_FAP.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.secret.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile("appsettings.secret.json", false, false);
+
+builder.Services.AddSingleton<IMongoDatabase>(_ =>
+{
+    var connectionString = builder.Configuration["MongoDB:ConnectionString"];
+    var databaseName     = builder.Configuration["MongoDB:DatabaseName"];
+    return new MongoClient(connectionString).GetDatabase(databaseName);
+});
+
+builder.Services.AddSingleton<UserCollection>();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -43,6 +55,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<UserInfoMiddleware>();
 
 app.MapControllers();
 

@@ -2,9 +2,23 @@ import Image from 'next/image';
 import styles from './style.module.css';
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from 'next/link';
+import { useEffect } from 'react';
+import Swal from 'sweetalert2';
 
 export default function HeaderComponent({ title, }) {
     const { data, status } = useSession();
+
+    useEffect(() => {
+        if (status != 'loading' && !data?.accessToken) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data?.errorToken || 'You are not logged in!',
+                showConfirmButton: false,
+                timer: 2000,
+            });
+        }
+    });
 
     return (
         <header className={styles["fp-header"]}>

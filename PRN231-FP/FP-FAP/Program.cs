@@ -11,9 +11,8 @@ builder.Configuration.AddJsonFile("appsettings.secret.json", false, false);
 
 builder.Services.AddSingleton<IMongoDatabase>(_ =>
 {
-    var connectionString = builder.Configuration["MongoDB:ConnectionString"];
-    var databaseName     = builder.Configuration["MongoDB:DatabaseName"];
-    return new MongoClient(connectionString).GetDatabase(databaseName);
+    var connectionString = builder.Configuration.GetConnectionString("DB");
+    return new MongoClient(connectionString).GetDatabase("prnfp");
 });
 
 builder.Services.AddSingleton<UserCollection>();

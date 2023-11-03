@@ -2,6 +2,7 @@ namespace FP_FAP.Controllers;
 
 using FP_FAP.Controllers.Base;
 using FP_FAP.Models;
+using FP_FAP.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,14 +14,19 @@ public class UserController : UserInfoController
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> GetAllUserAsync(CancellationToken cancellationToken = default)
     {
-        var users = await this.UserCollection.GetAllAsync(cancellationToken);
+        var users = await this.UserRepository.GetAllAsync(cancellationToken);
         return this.Ok(users);
     }
 
     [HttpGet("{email}")]
     public async Task<IActionResult> GetUserAsync(string email, CancellationToken cancellationToken = default)
     {
-        var user = await this.UserCollection.GetByIdAsync(email, cancellationToken);
+        var user = await this.UserRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
+        {
+            return this.NotFound();
+        }
+
         return this.Ok(user);
     }
 
@@ -34,18 +40,18 @@ public class UserController : UserInfoController
             return this.BadRequest("No email claim found in token.");
         }
 
-        var user = await this.UserCollection.GetByEmailAsync(email, cancellationToken);
+        var user = await this.UserRepository.GetByEmailAsync(email, cancellationToken);
         return this.Ok(user);
     }
 
     #region Inject
 
-    public UserController(UserCollection userCollection)
+    public UserController(IUserRepository userRepository)
     {
-        this.UserCollection = userCollection;
+        this.UserRepository = userRepository;
     }
 
-    private UserCollection UserCollection { get; }
+    private IUserRepository UserRepository { get; }
 
     #endregion
 }

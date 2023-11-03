@@ -1,7 +1,7 @@
 namespace FP_FAP.Middlewares;
 
 using System.Security.Claims;
-using FP_FAP.Models;
+using FP_FAP.Repositories.Interfaces;
 
 public class UserInfoMiddleware
 {
@@ -31,19 +31,19 @@ public class UserInfoMiddleware
             return;
         }
 
-        context.Items["User"] = await this.UserCollection.GetByEmailAsync(email);
+        context.Items["User"] = await this.UserRepository.GetByEmailAsync(email);
     }
 
     #region Inject
 
-    public UserInfoMiddleware(RequestDelegate next, UserCollection userCollection)
+    public UserInfoMiddleware(RequestDelegate next, IUserRepository userRepository)
     {
         this.Next           = next;
-        this.UserCollection = userCollection;
+        this.UserRepository = userRepository;
     }
 
     private RequestDelegate Next           { get; }
-    private UserCollection  UserCollection { get; }
+    private IUserRepository UserRepository { get; }
 
     #endregion
 }

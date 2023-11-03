@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FP_FAP.DTO;
 using FP_FAP.Models;
+using FP_FAP.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -16,22 +17,6 @@ using Microsoft.IdentityModel.Tokens;
 public class AuthController : ControllerBase
 {
     private TimeSpan TokenLifetime { get; } = TimeSpan.FromDays(1);
-
-    #region Inject
-
-    private IConfiguration Configuration  { get; }
-    private UserCollection UserCollection { get; }
-
-    public AuthController(
-        IConfiguration configuration,
-        UserCollection userCollection
-    )
-    {
-        this.Configuration  = configuration;
-        this.UserCollection = userCollection;
-    }
-
-    #endregion
 
     [HttpGet("generate-token")]
     [AllowAnonymous]
@@ -46,7 +31,7 @@ public class AuthController : ControllerBase
 
             this.InternalBusinessCheck(tokenInfo);
 
-            var user = await this.UserCollection.GetOrCreateByEmailAsync(tokenInfo.Email, cancellationToken);
+            var user = await this.UserRepository.GetOrCreateByEmailAsync(tokenInfo.Email, cancellationToken);
 
             var token = this.InternalGenerateToken(user, DateTime.Now.Add(this.TokenLifetime));
 
@@ -67,11 +52,50 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpGet("operator-generate-token")]
+    [AllowAnonymous]
+    public Task<IActionResult> OperatorGenerateToken(
+        [FromBody] OperatorGenerateTokenRequest request,
+        CancellationToken                       cancellationToken
+    )
+    {
+        try
+        {
+            if (request.SecretKey != this.Configuration["Jwt:Key"])
+            {
+                throw new("Invalid secret");
+            }
+
+            var user = new User
+            {
+                Email = request.Email,
+                Role  = request.Role,
+            };
+
+            var token = this.InternalGenerateToken(user, DateTime.Now.Add(this.TokenLifetime));
+
+            return Task.FromResult<IActionResult>(this.Ok(new GenerateTokenResponse
+            {
+                Success = true,
+                Message = "Generate token successfully",
+                Token   = token,
+            }));
+        }
+        catch (Exception e)
+        {
+            return Task.FromResult<IActionResult>(this.BadRequest(new GenerateTokenResponse
+            {
+                Success = false,
+                Message = e.Message,
+            }));
+        }
+    }
+
     private void InternalBusinessCheck(GoogleTokenInfo tokenInfo)
     {
         if (!tokenInfo.Email.EndsWith("@fpt.edu.vn"))
         {
-            throw new Exception("Only fpt email is allowed");
+            throw new("Only fpt email is allowed");
         }
     }
 
@@ -86,7 +110,7 @@ public class AuthController : ControllerBase
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception("Invalid google api token");
+            throw new("Invalid google api token");
         }
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -95,7 +119,7 @@ public class AuthController : ControllerBase
 
         if (tokenInfo is null)
         {
-            throw new Exception("Invalid google api token");
+            throw new("Invalid google api token");
         }
 
         return tokenInfo;
@@ -108,14 +132,14 @@ public class AuthController : ControllerBase
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new[]
+            Subject = new(new[]
             {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim(ClaimTypes.Role, user.Role),
                 new Claim(ClaimTypes.Email, user.Email),
             }),
             Expires = expires,
-            SigningCredentials = new SigningCredentials(
+            SigningCredentials = new(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature
             ),
@@ -140,4 +164,20 @@ public class AuthController : ControllerBase
         [JsonPropertyName("access_type")]
         public string AccessType { get; set; } = null!;
     }
+
+    #region Inject
+
+    private IConfiguration  Configuration  { get; }
+    private IUserRepository UserRepository { get; }
+
+    public AuthController(
+        IConfiguration  configuration,
+        IUserRepository userRepository
+    )
+    {
+        this.Configuration  = configuration;
+        this.UserRepository = userRepository;
+    }
+
+    #endregion
 }

@@ -10,6 +10,25 @@ public class GenerateTokenRequest
     public string GoogleAccessToken { get; set; } = null!;
 }
 
+public class OperatorGenerateTokenRequest
+{
+    [Required]
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = null!;
+
+    [Required]
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = null!;
+
+    [Required]
+    [JsonPropertyName("role")]
+    public string Role { get; set; } = null!;
+
+    [Required]
+    [JsonPropertyName("secret-key")]
+    public string SecretKey { get; set; } = null!;
+}
+
 public class GenerateTokenResponse
 {
     [JsonPropertyName("success")]

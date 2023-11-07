@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { generateToken } from "../../../api/fap-api/generate-token";
+import { getUserInfo } from '@/api/fap-api/get-user-info';
 
 export const authOptions = {
     providers: [
@@ -17,18 +18,20 @@ export const authOptions = {
 export default NextAuth({
     ...authOptions,
     callbacks: {
-        jwt: ({ token, account }) => {
+        jwt: async ({ token, account }) => {
             if (account) {
-                token.accessToken = account["access_token"];
+                token.response = await generateToken(account["access_token"]);
+
+                if (token.response.success) {
+                    token.userInfo = await getUserInfo(token.response.token);
+                }
             }
             return token;
         },
         session: async ({ session, token }) => {
-            const response = await generateToken(token.accessToken);
-
-            session.accessToken = response?.token;
-            session.errorToken = response?.message;
-
+            session.userInfo = token?.userInfo;
+            session.accessToken = token?.response?.token;
+            session.errorToken = token?.response?.message;
             return session;
         },
     },

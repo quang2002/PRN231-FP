@@ -4,7 +4,7 @@ import HeaderComponent from '../components/Header'
 import { Fragment } from 'react';
 
 
-function App({ Component, pageProps }) {
+export default function App({ Component, pageProps }) {
     return (
         <SessionProvider session={pageProps.session}>
             <Fragment>
@@ -18,5 +18,3 @@ function App({ Component, pageProps }) {
         </SessionProvider>
     );
 }
-
-export default App;

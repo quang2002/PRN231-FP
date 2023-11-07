@@ -56,4 +56,6 @@ services:
 volumes:
   grafana:
     driver: local
+  mysql:
+    driver: local
 

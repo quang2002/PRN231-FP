@@ -6,16 +6,22 @@ export async function generateToken(googleAccessToken: string): Promise<{
     token: string | null,
 }> {
     try {
-        const response = await client.get("/auth/generate-token", {
+        const response = await client.post("/auth/generate-token", {
             headers: {
                 "Content-Type": "application/json",
             },
-            data: {
-                "google-access-token": googleAccessToken,
-            }
+            "google-access-token": googleAccessToken,
         });
-        return response.data;
+        return {
+            success: true,
+            message: "Token generated successfully",
+            token: response.data,
+        };
     } catch (error: any) {
-        return error.response.data;
+        return {
+            success: false,
+            message: error.response.data,
+            token: null,
+        };
     }
 }

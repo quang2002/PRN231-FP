@@ -26,4 +26,8 @@ public class Group
     [BsonElement("students")]
     [BsonRepresentation(BsonType.ObjectId)]
     public ObjectId[] Students { get; set; } = Array.Empty<ObjectId>();
+
+    [BsonRequired]
+    [BsonElement("semester")]
+    public string Semester { get; set; } = null!;
 }

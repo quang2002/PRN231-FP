@@ -47,6 +47,8 @@ public class MongoUserRepository : IUserRepository
 
     public async Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await this.MongoDBContext.Users.Find(_ => true).ToListAsync(cancellationToken);
+        var filter = Builders<User>.Filter.Empty;
+        var result = await this.MongoDBContext.Users.FindAsync(filter, cancellationToken: cancellationToken);
+        return result.ToEnumerable(cancellationToken);
     }
 }

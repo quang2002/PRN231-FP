@@ -1,33 +1,33 @@
 ﻿namespace FP_FAP.Models;
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+[Table(nameof(Group))]
 public class Group
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [BsonRequired]
-    [BsonElement("name")]
-    public string? Name { get; set; }
+    [Required]
+    [MaxLength(10)]
+    public string Name { get; set; } = null!;
 
-    [BsonRequired]
-    [BsonElement("subject_id")]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId SubjectId { get; set; }
+    [Required]
+    [ForeignKey(nameof(Models.Subject))]
+    public int SubjectId { get; set; }
 
-    [BsonRequired]
-    [BsonElement("teacher_id")]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId TeacherId { get; set; }
+    [Required]
+    [ForeignKey(nameof(User))]
+    public int TeacherId { get; set; }
 
-    [BsonElement("students")]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId[] Students { get; set; } = Array.Empty<ObjectId>();
-
-    [BsonRequired]
-    [BsonElement("semester")]
+    [Required]
+    [MaxLength(10)]
     public string Semester { get; set; } = null!;
+
+    public virtual List<Feedback> Feedbacks { get; set; } = new();
+    public virtual List<Enroll>   Enrolls   { get; set; } = new();
+    public virtual Subject        Subject   { get; set; } = null!;
+    public virtual User           Teacher   { get; set; } = null!;
 }

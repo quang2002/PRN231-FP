@@ -41,7 +41,41 @@ public class UserController : UserInfoController
         }
 
         var user = await this.UserRepository.GetByEmailAsync(email, cancellationToken);
+
+        if (user is null)
+        {
+            return this.NotFound();
+        }
+
         return this.Ok(user);
+    }
+
+    [HttpGet("feedbacks")]
+    public async Task<IActionResult> GetUserFeedbacksAsync(CancellationToken cancellationToken = default)
+    {
+        var email = this.UserInfo?.Email;
+
+        if (string.IsNullOrEmpty(email))
+        {
+            return this.BadRequest("No email claim found in token.");
+        }
+
+        var feedbacks = (await this.UserRepository.GetUserFeedbacksAsync(email, cancellationToken)).ToArray();
+
+        if (!feedbacks.Any())
+        {
+            return this.NotFound();
+        }
+
+        foreach (var feedback in feedbacks)
+        {
+            feedback.Student.Enrolls      = null!;
+            feedback.Student.Feedbacks    = null!;
+            feedback.Group.Feedbacks      = null!;
+            feedback.Group.Subject.Groups = null!;
+        }
+
+        return this.Ok(feedbacks);
     }
 
     #region Inject

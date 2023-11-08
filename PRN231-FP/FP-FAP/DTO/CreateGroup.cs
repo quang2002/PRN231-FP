@@ -2,7 +2,6 @@ namespace FP_FAP.DTO;
 
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using MongoDB.Bson;
 
 public class CreateGroupRequest
 {
@@ -11,18 +10,14 @@ public class CreateGroupRequest
     public string Name { get; set; } = null!;
 
     [Required]
-    [JsonPropertyName("subject-id")]
-    public string SubjectId { get; set; } = null!;
+    [JsonPropertyName("subjectId")]
+    public int SubjectId { get; set; }
 
     [Required]
-    [JsonPropertyName("teacher-id")]
-    public string TeacherId { get; set; } = null!;
+    [JsonPropertyName("teacherId")]
+    public int TeacherId { get; set; }
 
     [Required]
     [JsonPropertyName("semester")]
     public string Semester { get; set; } = null!;
-
-    [Required]
-    [JsonPropertyName("students")]
-    public string[] Students { get; set; } = null!;
 }

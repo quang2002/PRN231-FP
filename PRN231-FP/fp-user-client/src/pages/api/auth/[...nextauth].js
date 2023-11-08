@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import { generateToken } from "../../../api/fap-api/generate-token";
-import { getUserInfo } from '@/api/fap-api/get-user-info';
+import { getUserInfo } from '@/api/fap-api/user';
 
 export const authOptions = {
     providers: [

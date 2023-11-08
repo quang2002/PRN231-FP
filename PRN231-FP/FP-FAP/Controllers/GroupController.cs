@@ -6,20 +6,55 @@ using FP_FAP.Models;
 using FP_FAP.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 
 [Authorize]
 [Route("api/group")]
 public class GroupController : UserInfoController
 {
-    [HttpGet("{semester}")]
+    [HttpGet]
     public async Task<IActionResult> GetGroups(
-        string?           semester,
-        CancellationToken cancellationToken
+        [FromQuery] string? semester,
+        CancellationToken   cancellationToken
     )
     {
         var groups = await this.GroupRepository.GetGroupsAsync(semester, cancellationToken);
         return this.Ok(groups);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetGroupById(
+        int               id,
+        CancellationToken cancellationToken
+    )
+    {
+        var group = await this.GroupRepository.GetGroupByIdAsync(id, cancellationToken);
+
+        if (group == null)
+        {
+            return this.NotFound("Group not found");
+        }
+
+        foreach (var enroll in group.Enrolls)
+        {
+            enroll.Student.Enrolls   = null!;
+            enroll.Student.Feedbacks = null!;
+
+            enroll.Group = null!;
+        }
+
+        foreach (var feedback in group.Feedbacks)
+        {
+            feedback.Student.Feedbacks = null!;
+            feedback.Student.Enrolls   = null!;
+            
+            feedback.Group = null!;
+        }
+        
+        group.Teacher.Enrolls   = null!;
+        group.Teacher.Feedbacks = null!;
+        group.Subject.Groups = null!;
+
+        return this.Ok(group);
     }
 
     [HttpPost]
@@ -33,9 +68,8 @@ public class GroupController : UserInfoController
         {
             Name      = group.Name,
             Semester  = group.Semester,
-            SubjectId = new ObjectId(group.SubjectId),
-            TeacherId = new ObjectId(group.TeacherId),
-            Students  = group.Students.Select(e => new ObjectId(e)).ToArray(),
+            SubjectId = group.SubjectId,
+            TeacherId = group.TeacherId,
         }, cancellationToken);
 
         if (!result)
@@ -52,15 +86,15 @@ public class GroupController : UserInfoController
         CancellationToken               cancellationToken
     )
     {
-        var authorizedId = this.UserInfo!.Id.ToString();
+        var authorizedId = this.UserInfo!.Id;
         if (this.UserInfo?.Role == Roles.Student && request.Students.Any(e => e != authorizedId))
         {
             return this.Unauthorized("You can only enroll yourself");
         }
 
         var result = await this.GroupRepository.EnrollStudentAsync(
-            new ObjectId(request.GroupId),
-            request.Students.Select(e => new ObjectId(e)).ToArray(),
+            request.GroupId,
+            request.Students,
             cancellationToken
         );
 
@@ -78,15 +112,15 @@ public class GroupController : UserInfoController
         CancellationToken               cancellationToken
     )
     {
-        var authorizedId = this.UserInfo!.Id.ToString();
+        var authorizedId = this.UserInfo!.Id;
         if (this.UserInfo?.Role == Roles.Student && request.Students.Any(e => e != authorizedId))
         {
             return this.Unauthorized("You can only unenroll yourself");
         }
 
         var result = await this.GroupRepository.UnenrollStudentAsync(
-            new ObjectId(request.GroupId),
-            request.Students.Select(e => new ObjectId(e)).ToArray(),
+            request.GroupId,
+            request.Students,
             cancellationToken
         );
 
@@ -98,15 +132,15 @@ public class GroupController : UserInfoController
         return this.Ok("Student unenroll successfully");
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete]
     [Authorize(Roles = Roles.Admin)]
     public async Task<IActionResult> DeleteGroup(
-        string            id,
+        [FromBody] int[]  id,
         CancellationToken cancellationToken
     )
     {
         var result = await this.GroupRepository.DeleteGroupAsync(
-            new ObjectId(id),
+            id,
             cancellationToken
         );
 
@@ -120,12 +154,14 @@ public class GroupController : UserInfoController
 
     #region Inject
 
-    public GroupController(IGroupRepository groupRepository)
+    public GroupController(IGroupRepository groupRepository, IUserRepository userRepository)
     {
         this.GroupRepository = groupRepository;
+        this.UserRepository  = userRepository;
     }
 
     private IGroupRepository GroupRepository { get; }
+    private IUserRepository  UserRepository  { get; }
 
     #endregion
 }

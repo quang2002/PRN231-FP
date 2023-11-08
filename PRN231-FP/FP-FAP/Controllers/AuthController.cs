@@ -29,7 +29,7 @@ public class AuthController : ControllerBase
         {
             var tokenInfo = await this.InternalGoogleTokenInfoAsync(request.GoogleAccessToken, cancellationToken);
 
-            this.InternalBusinessCheck(tokenInfo);
+            // this.InternalBusinessCheck(tokenInfo);
 
             var user = await this.UserRepository.GetOrCreateByEmailAsync(tokenInfo.Email, cancellationToken);
 

@@ -1,19 +1,22 @@
 ﻿namespace FP_FAP.Models;
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+[Table(nameof(Subject))]
 public class Subject
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [BsonRequired]
-    [BsonElement("code")]
-    public string? Code { get; set; }
+    [Required]
+    [MaxLength(10)]
+    public string Code { get; set; } = null!;
 
-    [BsonRequired]
-    [BsonElement("name")]
-    public string? Name { get; set; }
+    [Required]
+    [MaxLength(50)]
+    public string Name { get; set; } = null!;
+    
+    public virtual List<Group> Groups { get; set; } = new();
 }

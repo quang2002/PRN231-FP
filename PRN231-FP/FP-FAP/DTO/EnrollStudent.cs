@@ -6,10 +6,8 @@ using System.Text.Json.Serialization;
 public class EnrollStudentRequest
 {
     [Required]
-    [JsonPropertyName("group-id")]
-    public string GroupId { get; set; } = null!;
+    public int GroupId { get; set; }
 
     [Required]
-    [JsonPropertyName("students")]
-    public string[] Students { get; set; } = null!;
+    public int[] Students { get; set; } = null!;
 }

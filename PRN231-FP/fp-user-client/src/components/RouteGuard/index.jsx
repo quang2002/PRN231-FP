@@ -1,3 +1,4 @@
+import { Spinner } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -21,7 +22,20 @@ export default function RouteGuard({ children, role }) {
     }, [data, status]);
 
     if (status === 'loading') {
-        return <></>;
+        return (
+            <Spinner
+                size="lg"
+                color="primary"
+                strokeWidth={4}
+                style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)"
+                }}
+                label="Loading..."
+            />
+        );
     }
 
     if (status === 'unauthenticated' || !data?.accessToken) {
@@ -42,7 +56,9 @@ export default function RouteGuard({ children, role }) {
         return <></>;
     }
 
-    children = React.cloneElement(children, { data });
+    console.log(data)
+
+    children = React.cloneElement(children, { session: data });
 
     return children;
 }

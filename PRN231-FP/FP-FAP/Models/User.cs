@@ -1,8 +1,7 @@
 namespace FP_FAP.Models;
 
-using System.Text.Json.Serialization;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class Roles
 {
@@ -11,18 +10,21 @@ public class Roles
     public const string Admin   = "admin";
 }
 
+[Table(nameof(User))]
 public class User
 {
-    [BsonId]
-    [JsonPropertyName("id")]
-    public ObjectId Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [BsonRequired]
-    [BsonElement("email")]
-    [JsonPropertyName("email")]
+    [Required]
+    [MaxLength(50)]
     public string Email { get; set; } = null!;
 
-    [BsonElement("role")]
-    [JsonPropertyName("role")]
+    [Required]
+    [MaxLength(10)]
     public string Role { get; set; } = null!;
+
+    public virtual List<Enroll>   Enrolls   { get; set; } = new();
+    public virtual List<Feedback> Feedbacks { get; set; } = new();
 }

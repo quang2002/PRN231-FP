@@ -1,41 +1,39 @@
 ﻿namespace FP_FAP.Models;
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+[Table("Feedback")]
 public class Feedback
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId Id { get; set; }
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
 
-    [BsonRequired]
-    [BsonElement("student_id")]
-    public ObjectId StudentId { get; set; }
+    [Required]
+    [ForeignKey(nameof(User))]
+    public int StudentId { get; set; }
 
-    [BsonRequired]
-    [BsonElement("group_id")]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public ObjectId GroupId { get; set; }
+    [Required]
+    [ForeignKey(nameof(Models.Group))]
+    public int GroupId { get; set; }
 
-    [BsonElement("is_done")]
     public bool IsDone { get; set; }
 
-    [BsonElement("punctuality")]
     public int Punctuality { get; set; }
 
-    [BsonElement("skill")]
     public int Skill { get; set; }
 
-    [BsonElement("adequately")]
     public int Adequately { get; set; }
 
-    [BsonElement("support")]
     public int Support { get; set; }
 
-    [BsonElement("response")]
     public int Response { get; set; }
 
-    [BsonElement("comment")]
+    [MaxLength(500)]
     public string? Comment { get; set; }
+
+    public virtual User Student { get; set; } = null!;
+
+    public virtual Group Group { get; set; } = null!;
 }

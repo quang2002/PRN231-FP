@@ -1,6 +1,3 @@
-import axios from "axios";
-
-export const client = axios.create({
-    baseURL: process.env.FP_FAP_API_BASE_URL,
-    timeout: 5000,
-});
+export function baseURL() {
+    return process.env.FP_FAP_API_BASE_URL || process.env.NEXT_PUBLIC_FP_FAP_API_BASE_URL;
+}

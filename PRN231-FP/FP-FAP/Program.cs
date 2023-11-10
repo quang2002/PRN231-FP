@@ -6,20 +6,19 @@ using FP_FAP.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.secret.json", false, false);
 
-builder.Services.AddSingleton<MongoDBContext>(_ =>
-{
-    var connectionString = builder.Configuration.GetConnectionString("DB");
-    var database         = new MongoClient(connectionString).GetDatabase("prnfp");
-    return new(database);
-});
+builder.Services.AddDbContext<ProjectDbContext>();
 
-builder.Services.AddSingleton<IUserRepository, MongoUserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+
+builder.Services.AddScoped<UserInfoMiddleware>();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -27,7 +26,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "FP_FAP", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "FP_FAP", Version = "v1" });
 
     var scheme = new OpenApiSecurityScheme
     {
@@ -37,7 +36,7 @@ builder.Services.AddSwaggerGen(c =>
         In           = ParameterLocation.Header,
         Type         = SecuritySchemeType.Http,
         Scheme       = JwtBearerDefaults.AuthenticationScheme,
-        Reference = new()
+        Reference = new OpenApiReference
         {
             Id   = JwtBearerDefaults.AuthenticationScheme,
             Type = ReferenceType.SecurityScheme,
@@ -46,7 +45,7 @@ builder.Services.AddSwaggerGen(c =>
 
     c.AddSecurityDefinition(scheme.Reference.Id, scheme);
 
-    c.AddSecurityRequirement(new()
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         [scheme] = Array.Empty<string>(),
     });
@@ -58,7 +57,7 @@ builder.Services
        {
            var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 
-           options.TokenValidationParameters = new()
+           options.TokenValidationParameters = new TokenValidationParameters
            {
                IssuerSigningKey         = new SymmetricSecurityKey(key),
                ValidateIssuer           = false,
@@ -70,6 +69,16 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("allow_all", policyBuilder =>
+    {
+        policyBuilder.AllowAnyOrigin()
+                     .AllowAnyMethod()
+                     .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -79,8 +88,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseEnsureMigration();
+
 app.UseHttpsRedirection();
 
+app.UseCors("allow_all");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<UserInfoMiddleware>();

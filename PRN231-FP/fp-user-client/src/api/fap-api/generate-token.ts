@@ -1,4 +1,4 @@
-import { client } from "./index";
+import { baseURL } from ".";
 
 export async function generateToken(googleAccessToken: string): Promise<{
     success: boolean,
@@ -6,16 +6,28 @@ export async function generateToken(googleAccessToken: string): Promise<{
     token: string | null,
 }> {
     try {
-        const response = await client.get("/auth/generate-token", {
-            headers: {
-                "Content-Type": "application/json",
-            },
-            data: {
-                "google-access-token": googleAccessToken,
-            }
-        });
-        return response.data;
+        const response = await fetch(
+            `${baseURL()}/auth/generate-token`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    "google-access-token": googleAccessToken
+                }),
+            }).then(res => res.text());
+
+        return {
+            success: true,
+            message: "Token generated successfully",
+            token: response,
+        };
     } catch (error: any) {
-        return error.response.data;
+        return {
+            success: false,
+            message: error,
+            token: null,
+        };
     }
 }

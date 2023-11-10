@@ -3,16 +3,16 @@ namespace FP_FAP.Middlewares;
 using System.Security.Claims;
 using FP_FAP.Repositories.Interfaces;
 
-public class UserInfoMiddleware
+public class UserInfoMiddleware : IMiddleware
 {
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         if (context.Request.Headers["Authorization"].FirstOrDefault() is not null)
         {
             await this.AttachUserToContext(context);
         }
 
-        await this.Next(context);
+        await next(context);
     }
 
     private async Task AttachUserToContext(HttpContext context)
@@ -36,13 +36,11 @@ public class UserInfoMiddleware
 
     #region Inject
 
-    public UserInfoMiddleware(RequestDelegate next, IUserRepository userRepository)
+    public UserInfoMiddleware(IUserRepository userRepository)
     {
-        this.Next           = next;
         this.UserRepository = userRepository;
     }
 
-    private RequestDelegate Next           { get; }
     private IUserRepository UserRepository { get; }
 
     #endregion

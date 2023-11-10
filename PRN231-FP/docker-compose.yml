@@ -6,13 +6,12 @@ services:
     build:
       context: .
       dockerfile: FP-FAP/Dockerfile
+    ports:
+      - '8080:80'
+    restart: unless-stopped
+    depends_on:
+      - mysql
 
-  fp-chat:
-    image: 'fp-chat'
-    build:
-      context: .
-      dockerfile: FP-Chat/Dockerfile
-  
   node-exporter:
     image: 'prom/node-exporter:latest'
     volumes:
@@ -48,12 +47,26 @@ services:
     ports:
       - '80:80'
     depends_on:
-      - fp-chat
       - fp-fap
       - prometheus
       - grafana
 
+  mysql:
+    image: 'mysql/mysql-server:latest'
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_DATABASE=prn_fp
+      - MYSQL_USER=prn_fp
+      - MYSQL_PASSWORD=prn_fp
+      - MYSQL_ROOT_PASSWORD=prn_fp
+    restart: unless-stopped
+
 volumes:
   grafana:
+    driver: local
+  mysql:
     driver: local
 

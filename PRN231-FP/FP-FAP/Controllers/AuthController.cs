@@ -18,7 +18,7 @@ public class AuthController : ControllerBase
 {
     private TimeSpan TokenLifetime { get; } = TimeSpan.FromDays(1);
 
-    [HttpGet("generate-token")]
+    [HttpPost("generate-token")]
     [AllowAnonymous]
     public async Task<IActionResult> GenerateToken(
         [FromBody] GenerateTokenRequest request,
@@ -29,30 +29,21 @@ public class AuthController : ControllerBase
         {
             var tokenInfo = await this.InternalGoogleTokenInfoAsync(request.GoogleAccessToken, cancellationToken);
 
-            this.InternalBusinessCheck(tokenInfo);
+            // this.InternalBusinessCheck(tokenInfo);
 
             var user = await this.UserRepository.GetOrCreateByEmailAsync(tokenInfo.Email, cancellationToken);
 
             var token = this.InternalGenerateToken(user, DateTime.Now.Add(this.TokenLifetime));
 
-            return this.Ok(new GenerateTokenResponse
-            {
-                Success = true,
-                Message = "Generate token successfully",
-                Token   = token,
-            });
+            return this.Ok(token);
         }
         catch (Exception e)
         {
-            return this.BadRequest(new GenerateTokenResponse
-            {
-                Success = false,
-                Message = e.Message,
-            });
+            return this.BadRequest(e.Message);
         }
     }
 
-    [HttpGet("operator-generate-token")]
+    [HttpPost("operator-generate-token")]
     [AllowAnonymous]
     public Task<IActionResult> OperatorGenerateToken(
         [FromBody] OperatorGenerateTokenRequest request,
@@ -63,7 +54,7 @@ public class AuthController : ControllerBase
         {
             if (request.SecretKey != this.Configuration["Jwt:Key"])
             {
-                throw new("Invalid secret");
+                throw new Exception("Invalid secret");
             }
 
             var user = new User
@@ -74,20 +65,11 @@ public class AuthController : ControllerBase
 
             var token = this.InternalGenerateToken(user, DateTime.Now.Add(this.TokenLifetime));
 
-            return Task.FromResult<IActionResult>(this.Ok(new GenerateTokenResponse
-            {
-                Success = true,
-                Message = "Generate token successfully",
-                Token   = token,
-            }));
+            return Task.FromResult<IActionResult>(this.Ok(token));
         }
         catch (Exception e)
         {
-            return Task.FromResult<IActionResult>(this.BadRequest(new GenerateTokenResponse
-            {
-                Success = false,
-                Message = e.Message,
-            }));
+            return Task.FromResult<IActionResult>(this.BadRequest(e.Message));
         }
     }
 
@@ -95,7 +77,7 @@ public class AuthController : ControllerBase
     {
         if (!tokenInfo.Email.EndsWith("@fpt.edu.vn"))
         {
-            throw new("Only fpt email is allowed");
+            throw new Exception("Only fpt email is allowed");
         }
     }
 
@@ -110,7 +92,7 @@ public class AuthController : ControllerBase
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new("Invalid google api token");
+            throw new Exception("Invalid google api token");
         }
 
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -119,7 +101,7 @@ public class AuthController : ControllerBase
 
         if (tokenInfo is null)
         {
-            throw new("Invalid google api token");
+            throw new Exception("Invalid google api token");
         }
 
         return tokenInfo;
@@ -132,14 +114,14 @@ public class AuthController : ControllerBase
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new(new[]
+            Subject = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim(ClaimTypes.Role, user.Role),
                 new Claim(ClaimTypes.Email, user.Email),
             }),
             Expires = expires,
-            SigningCredentials = new(
+            SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(key),
                 SecurityAlgorithms.HmacSha256Signature
             ),
